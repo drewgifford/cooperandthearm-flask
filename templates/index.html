@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <title>Cooper and the Arm</title>
+</head>
+
+<body class="bg-slate-900">
+
+    <div class="max-w-screen-md mx-auto">
+
+        <div class="text-center">
+            <h1 class="text-slate-100 text-5xl font-bold mb-4"><span class="text-amber-600">COOPER</span> AND THE ARM</h1>
+            
+            <a href="https://github.com/drewgifford/cooperandthearm-python" target="_blank" class="inline-block mr-5 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg"><img class="inline-block h-5 w-5 mr-1 mb-1" src="/static/github.png"/> Microcontroller</a>
+            <a href="https://github.com/drewgifford/CooperAndTheArm" target="_blank" class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg"><img class="inline-block h-5 w-5 mr-1 mb-1" src="/static/github.png"/> Python Library</a>
+        
+            <p class="text-slate-300 mt-4 mb-4">Project by Drew Gifford, Ethan Purcell, and Jake Millsaps</p>
+        </div>
+
+        <div class="grid columns-4">
+
+            <div id="base-control">
+                <h2 class="font-bold text-slate-100 mb-2">Base</h2>
+
+                <div class="mb-2">
+                    <label class="text-slate-100 text-sm" for="base-angle">Angle</label>
+                    <div class="flex gap-2">
+                        <input id="base-angle" class="inline-block flex-1 bg-slate-800 text-slate-100 border border-slate-500 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" type="number" min="-1000" max="1000" value="0"/>
+                        <button id="base-angle-set" class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2.5 rounded-lg text-sm">Set</button>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <label class="text-slate-100 text-sm" for="base-angle">Speed</label>
+                    <div class="flex gap-2">
+                        <input id="base-speed" class="inline-block flex-1 bg-slate-800 text-slate-100 border border-slate-500 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" type="number" min="1" max="20" value="5"/>
+                        <button id="base-speed-set" class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2.5 rounded-lg text-sm">Set</button>
+                    </div>
+                </div>
+
+                <p class="text-slate-100 text-sm" for="base-angle">Continuous Motion</p>
+                <button id="base-motion-positive" class="mt-2 block bg-slate-800 border border border-slate-500 rounded-lg p-8 flex items-center justify-center font-bold text-slate-200 hover:bg-slate-600">
+                    <span class="text-4xl">▲</span>
+                </button>
+                <button id="base-motion-negative" class="block mt-2 bg-slate-800 border border border-slate-500 rounded-lg p-8 flex items-center justify-center font-bold text-slate-200 hover:bg-slate-600">
+                    <span class="text-4xl">▼</span>
+                </button>
+
+                <div class="mt-2">
+                    <label class="text-slate-400 text-sm" for="base-speed-view">Current Angle (readonly)</label>
+                    <input id="base-speed-view" class="inline-block flex-1 bg-slate-800 text-slate-400 border border-slate-500 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" type="text" value="0" disabled/>
+                </div>
+                <div class="mt-2">
+                    <label class="text-slate-400 text-sm" for="base-speed-view">Current Speed (readonly)</label>
+                    <input id="base-speed-view" class="inline-block flex-1 bg-slate-800 text-slate-400 border border-slate-500 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" type="text" value="0" disabled/>
+                </div>
+                
+            </div>
+
+        </div>
+        
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+
+
+
+    <script>
+        var socket = io();
+
+        socket.on('connect', () => {
+            main();
+        })
+
+        function main(){
+            const COMPONENTS = ["base"];
+
+            moving = {}
+
+            for(component of COMPONENTS){
+
+                moving[component] = false;
+
+                // Check for input changes
+                const OPTIONS = ["angle", "speed"];
+
+                $("#" + component + "-angle-set").click(() => {
+                    value = $("#" + component + "-angle").val();
+                    socket.emit("set", { component, option: "angle", value });
+                });
+
+                $("#" + component + "-speed-set").click(() => {
+                    value = $("#" + component + "-speed").val();
+                    socket.emit("set", { component, option: "speed", value });
+                });
+
+
+                // Continuous motion
+                const startMotion = (dir) => {
+                    if(moving[component]) return;
+                    socket.emit('begin_motion', { component, direction: dir });
+                    moving[component] = true;
+                };
+                const endMotion = (dir) => {
+                    if(!moving[component]) return;
+                    socket.emit('stop_motion', { component })
+                    moving[component] = false;
+                };
+
+                $('#' + component + '-motion-positive').mousedown(() => startMotion(1));
+                $('#' + component + '-motion-negative').mousedown(() => startMotion(-1));
+                $(document).mouseup(() => endMotion());
+
+            }
+
+            setInterval(() => {
+
+                /*$.get('/read', (data) => {
+
+                    for(c of Object.keys(data)){
+                        for(o of Object.keys(data[c])){
+                            $('#' + c + '-' + o + '-view').val(data[c][o]);
+                        }
+                    }
+
+                });*/
+
+            }, 1000)
+        }
+
+
+
+    </script>
+
+</body>
+
+
+</html>
