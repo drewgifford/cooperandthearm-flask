@@ -3,42 +3,30 @@ from cooperandthearm import CooperAndTheArm, Component
 from cooperandthearm.command import Command
 from cooperandthearm.instruction import SetSpeed, SetAngle, Instruction, GetAngle
 from flask_socketio import SocketIO
-from dispatcher import ArmDispatcher
+from util import component_from_str, instruction_from_set_option
 import asyncio
+from threading import Thread, Event
 
-movement_task: asyncio.Task = None
-movement_active = asyncio.Event()
+movement_thread: Thread | None = None
+movement_active: Event = Event()
 
-def component_from_str(component: str) -> Component:
-    if component == "base":
-        return Component.BASE
-    elif component == "shoulder":
-        return Component.SHOULDER
-    elif component == "elbow":
-        return Component.ELBOW
-    elif component == "claw":
-        return Component.CLAW
-    
-    return None
+async def arm_motion(component: Component, direction: int, arm: CooperAndTheArm):
+    STEP = 100
 
-def instruction_from_set_option(set_option: str, value: int) -> Instruction | None:
-    if set_option == "angle":
-        return SetAngle(value)
-    elif set_option == "speed":
-        return SetSpeed(value)
-    
-    return None
+    global movement_active
+
+    while True:
+        angle = (await arm.dispatch(Command(component, GetAngle())))[0]
+        new_angle = max(min(angle + (STEP * direction), 1000), -1000)
+        await arm.dispatch(Command(component, SetAngle(new_angle)))
+        await asyncio.sleep(0.01)
+
+        if not movement_active.is_set():
+            break
         
-def define_sockets(socketio: SocketIO, dispatcher: ArmDispatcher):
+def define_sockets(socketio: SocketIO, arm: CooperAndTheArm):
 
-    def arm_motion(component: Component, direction: int):
-        STEP = 100
-        while movement_active.is_set():
-            angle = (dispatcher.dispatch_sync(Command(component, GetAngle())))[0]
-            new_angle = max(min(angle + (STEP * direction), 1000), -1000)
-            dispatcher.dispatch_sync(Command(component, SetAngle(new_angle)))
-            await asyncio.sleep(0.01)
-
+    print("Defining sockets...")
 
     @socketio.on("begin_motion")
     def on_begin_motion(data):
@@ -51,18 +39,31 @@ def define_sockets(socketio: SocketIO, dispatcher: ArmDispatcher):
         if data and direction:
             direction = 1 if direction > 0 else -1
 
+            global movement_thread, movement_active
+
             if not movement_active.is_set():
                 movement_active.set()
-
-                arm_motion(component, direction)
+                movement_thread = Thread(target=asyncio.run, args=(arm_motion(component, direction, arm),))
+                movement_thread.start()
 
 
     @socketio.on("stop_motion")
     def on_stop_motion(data):
+
+        global movement_thread, movement_active
+        
+        print(movement_thread, movement_active)
+
         movement_active.clear()
+        if movement_thread is not None:
+            movement_thread.join()
+            movement_thread = None
+        
+
+        
 
     @socketio.on("set")
-    async def on_set(data):
+    def on_set(data):
 
         print("DATA:", data)
 
@@ -88,4 +89,7 @@ def define_sockets(socketio: SocketIO, dispatcher: ArmDispatcher):
         
         command = Command(comp, instruction)
 
-        await dispatcher.dispatch(command)
+        async def send_command(command: Command):
+            await arm.dispatch(command)
+
+        asyncio.run(send_command(command))
