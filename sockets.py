@@ -89,7 +89,4 @@ def define_sockets(socketio: SocketIO, arm: CooperAndTheArm):
         
         command = Command(comp, instruction)
 
-        async def send_command(command: Command):
-            await arm.dispatch(command)
-
-        asyncio.run(send_command(command))
+        asyncio.run(arm.dispatch(command))

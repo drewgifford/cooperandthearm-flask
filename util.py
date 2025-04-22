@@ -1,7 +1,7 @@
 from cooperandthearm import BASE, SHOULDER, ELBOW, CLAW, Component, SetAngle, SetSpeed
 from cooperandthearm.instruction import Instruction
 
-COMPONENTS = [BASE, SHOULDER]
+COMPONENTS = [BASE, SHOULDER, ELBOW, CLAW]
 
 def component_from_str(component: str) -> Component:
     if component == "base":

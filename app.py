@@ -10,11 +10,11 @@ socketio: SocketIO = None
 
 async def main():
 
-    arm = CooperAndTheArm("COM4")
+    arm = CooperAndTheArm("/dev/cu.usbserial-14230")
     await arm.connect()
 
     app = Flask(__name__)
-    socketio = SocketIO(app)
+    socketio = SocketIO(app, async_mode="threading")
     
     define_routes(app, arm)
     define_sockets(socketio, arm)

@@ -28,8 +28,10 @@ async def update_thread(socketio: SocketIO, arm: CooperAndTheArm):
                 "speed": speed
             }
 
+
         if data != last_packet:
             socketio.emit("update", data)
+            print("updating", data)
             last_packet = data
 
         await asyncio.sleep(0.1)

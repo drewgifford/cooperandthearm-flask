@@ -10,9 +10,9 @@
     <title>Cooper and the Arm</title>
 </head>
 
-<body class="bg-slate-900">
+<body class="bg-slate-900 py-8">
 
-    <div class="max-w-screen-md mx-auto">
+    <div class="container mx-auto">
 
         <div class="text-center text-sm">
             <h1 class="text-slate-100 text-5xl font-bold mb-4"><span class="text-amber-600">COOPER</span> AND THE ARM</h1>
@@ -25,27 +25,27 @@
             <p class="text-slate-300 mt-4 mb-4">Project by Drew Gifford, Ethan Purcell, and Jake Millsaps</p>
         </div>
 
-        <div class="grid columns-4">
+        <div class="grid grid-cols-2 gap-4">
 
             {% for component in ['base', 'shoulder', 'elbow', 'claw'] %}
 
-            <div id="base-control">
-                <h2 class="font-bold text-slate-100 mb-2">Base</h2>
+            <div id="base-control" class="p-4 bg-slate-900 border border-slate-500 rounded-lg">
+                <h2 class="font-bold text-slate-100 mb-2 text-2xl">{{ component.upper() }}</h2>
 
                 <div class="flex mb-2 gap-2">
                     <div class="flex-1">
-                        <label class="text-slate-100 text-sm" for="base-angle">Angle</label>
+                        <label class="text-slate-100 text-sm" for="{{ component }}-angle">Angle</label>
                         <div class="flex gap-2">
-                            <input id="base-angle" class="inline-block flex-1 bg-slate-800 text-slate-100 border border-slate-500 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" type="number" min="-1000" max="1000" value="0"/>
-                            <button id="base-angle-set" class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2.5 rounded-lg text-sm">Set</button>
+                            <input id="{{ component }}-angle" class="inline-block flex-1 bg-slate-800 text-slate-100 border border-slate-500 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" type="number" min="-1000" max="1000" value="0"/>
+                            <button id="{{ component }}-angle-set" class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2.5 rounded-lg text-sm">Set</button>
                         </div>
                     </div>
     
                     <div class="flex-1">
-                        <label class="text-slate-100 text-sm" for="base-angle">Speed</label>
+                        <label class="text-slate-100 text-sm" for="{{ component }}-speed">Speed</label>
                         <div class="flex gap-2">
-                            <input id="base-speed" class="inline-block flex-1 bg-slate-800 text-slate-100 border border-slate-500 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" type="number" min="1" max="20" value="5"/>
-                            <button id="base-speed-set" class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2.5 rounded-lg text-sm">Set</button>
+                            <input id="{{ component }}-speed" class="inline-block flex-1 bg-slate-800 text-slate-100 border border-slate-500 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" type="number" min="1" max="20" value="5"/>
+                            <button id="{{ component }}-speed-set" class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2.5 rounded-lg text-sm">Set</button>
                         </div>
                     </div>
                 </div>
@@ -53,20 +53,20 @@
                 <div class="flex gap-2 mt-2">
                     <div class="flex-1">
                         <label class="text-slate-400 text-sm" for="base-angle-view">Current Angle (readonly)</label>
-                        <input id="base-angle-view" class="inline-block flex-1 bg-slate-800 text-slate-400 border border-slate-500 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" type="text" value="0" disabled/>
+                        <input id="{{ component }}-angle-view" class="inline-block flex-1 bg-slate-800 text-slate-400 border border-slate-500 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" type="text" value="0" disabled/>
                     </div>
                     <div class="flex-1">
                         <label class="text-slate-400 text-sm" for="base-speed-view">Current Speed (readonly)</label>
-                        <input id="base-speed-view" class="inline-block flex-1 bg-slate-800 text-slate-400 border border-slate-500 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" type="text" value="0" disabled/>
+                        <input id="{{ component }}-speed-view" class="inline-block flex-1 bg-slate-800 text-slate-400 border border-slate-500 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" type="text" value="0" disabled/>
                     </div>
                 </div>
 
-                <p class="text-slate-100 text-sm mt-2" for="base-angle">Continuous Motion</p>
+                <p class="text-slate-100 text-sm mt-2">Continuous Motion</p>
                 <div class="flex gap-2">
-                    <button id="base-motion-negative" class="w-full block bg-slate-800 border border border-slate-500 rounded-lg p-8 flex items-center justify-center font-bold text-slate-200 hover:bg-slate-600">
+                    <button id="{{ component }}-motion-negative" class="w-full block bg-slate-800 border border border-slate-500 rounded-lg p-6 flex items-center justify-center font-bold text-slate-200 hover:bg-slate-600">
                         <span class="text-4xl">◀&#xFE0E;</span>
                     </button>
-                    <button id="base-motion-positive" class="w-full block bg-slate-800 border border border-slate-500 rounded-lg p-8 flex items-center justify-center font-bold text-slate-200 hover:bg-slate-600">
+                    <button id="{{ component }}-motion-positive" class="w-full block bg-slate-800 border border border-slate-500 rounded-lg p-6 flex items-center justify-center font-bold text-slate-200 hover:bg-slate-600">
                         <span class="text-4xl">▶&#xFE0E;</span>
                     </button>
                 </div>
@@ -96,48 +96,55 @@
             main();
         });
 
-        function main(){
-            const COMPONENTS = ["base"];
+        moving = {}
+        const handleComponentEntry = (comp) => {
 
-            moving = {}
+            const component = comp;
+            moving[component] = false;
+            // Check for input changes
+            const OPTIONS = ["angle", "speed"];
+
+            $("#" + component + "-angle-set").click(() => {
+                value = $("#" + component + "-angle").val();
+                socket.emit("set", { component, option: "angle", value });
+            });
+
+            $("#" + component + "-speed-set").click(() => {
+                value = $("#" + component + "-speed").val();
+                socket.emit("set", { component, option: "speed", value });
+            });
+
+
+            // Continuous motion
+            const startMotion = (dir) => {
+                if(moving[component]) return;
+                socket.emit('begin_motion', { component, direction: dir });
+                moving[component] = true;
+            };
+            const endMotion = (dir) => {
+                if(!moving[component]) return;
+                socket.emit('stop_motion', { component })
+                moving[component] = false;
+            };
+
+            $('#' + component + '-motion-positive').mousedown(() => startMotion(1));
+            $('#' + component + '-motion-negative').mousedown(() => startMotion(-1));
+            $(document).mouseup(() => endMotion());
+
+        }
+
+        function main(){
+            const COMPONENTS = ["base", "shoulder", "elbow", "claw"];
+
+            
 
             for(component of COMPONENTS){
-
-                moving[component] = false;
-
-                // Check for input changes
-                const OPTIONS = ["angle", "speed"];
-
-                $("#" + component + "-angle-set").click(() => {
-                    value = $("#" + component + "-angle").val();
-                    socket.emit("set", { component, option: "angle", value });
-                });
-
-                $("#" + component + "-speed-set").click(() => {
-                    value = $("#" + component + "-speed").val();
-                    socket.emit("set", { component, option: "speed", value });
-                });
-
-
-                // Continuous motion
-                const startMotion = (dir) => {
-                    if(moving[component]) return;
-                    socket.emit('begin_motion', { component, direction: dir });
-                    moving[component] = true;
-                };
-                const endMotion = (dir) => {
-                    if(!moving[component]) return;
-                    socket.emit('stop_motion', { component })
-                    moving[component] = false;
-                };
-
-                $('#' + component + '-motion-positive').mousedown(() => startMotion(1));
-                $('#' + component + '-motion-negative').mousedown(() => startMotion(-1));
-                $(document).mouseup(() => endMotion());
-
+                handleComponentEntry(component);
             }
 
             socket.on('update', (data) => {
+
+                console.info(data);
 
                 for(c of Object.keys(data)){
                     for(o of Object.keys(data[c])){
